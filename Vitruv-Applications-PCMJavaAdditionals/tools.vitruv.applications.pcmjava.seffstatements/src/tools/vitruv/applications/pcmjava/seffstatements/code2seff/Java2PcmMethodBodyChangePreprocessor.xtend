@@ -4,18 +4,19 @@ import org.emftext.language.java.members.Method
 import org.palladiosimulator.pcm.repository.BasicComponent
 import org.somox.gast2seff.visitors.InterfaceOfExternalCallFindingFactory
 import org.somox.gast2seff.visitors.ResourceDemandingBehaviourForClassMethodFinding
-import tools.vitruv.domains.pcm.PcmDomainProvider
-import tools.vitruv.framework.correspondence.CorrespondenceModel
-import tools.vitruv.framework.userinteraction.UserInteractor
-import tools.vitruv.framework.propagation.impl.AbstractChangePropagationSpecification
-import tools.vitruv.framework.propagation.ResourceAccess
-import tools.vitruv.framework.change.echange.EChange
+//import tools.vitruv.domains.pcm.PcmDomainProvider
+import tools.vitruv.change.correspondence.model.CorrespondenceModel
+import tools.vitruv.change.interaction.UserInteractor
+import tools.vitruv.change.propagation.impl.AbstractChangePropagationSpecification
+import tools.vitruv.change.propagation.ResourceAccess
+import tools.vitruv.change.atomic.EChange
 import org.somox.gast2seff.visitors.AbstractFunctionClassificationStrategy
-import tools.vitruv.domains.java.JavaDomain
-import tools.vitruv.domains.java.JavaDomainProvider
-import tools.vitruv.framework.change.echange.feature.attribute.ReplaceSingleValuedEAttribute
+//import tools.vitruv.domains.java.JavaDomain
+//import tools.vitruv.domains.java.JavaDomainProvider
+//import tools.vitruv.change.echange.feature.attribute.ReplaceSingleValuedEAttribute
 import org.emftext.language.java.commons.CommonsPackage
-import tools.vitruv.framework.domains.AbstractVitruvDomain
+//import tools.vitruv.change.domains.AbstractVitruvDomain
+import tools.vitruv.change.atomic.feature.attribute.ReplaceSingleValuedEAttribute
 
 class Java2PcmMethodBodyChangePreprocessor extends AbstractChangePropagationSpecification {
 	val Code2SeffFactory code2SeffFactory;

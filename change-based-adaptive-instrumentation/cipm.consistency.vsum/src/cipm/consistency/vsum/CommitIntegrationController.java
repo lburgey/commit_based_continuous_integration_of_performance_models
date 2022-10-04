@@ -28,7 +28,7 @@ import cipm.consistency.commitintegration.settings.SettingKeys;
 import cipm.consistency.cpr.javapcm.additional.validation.ExternalCallEmptyTargetFiller;
 import cipm.consistency.designtime.instrumentation2.CodeInstrumenter;
 import cipm.consistency.tools.evaluation.data.EvaluationDataContainer;
-import tools.vitruv.framework.propagation.ChangePropagationSpecification;
+import tools.vitruv.change.propagation.ChangePropagationSpecification;
 
 /**
  * This central class is responsible for controlling the complete change propagation and adaptive instrumentation.

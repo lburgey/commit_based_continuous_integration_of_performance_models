@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import cipm.consistency.commitintegration.JavaParserAndPropagatorUtils;
 import cipm.consistency.commitintegration.detection.TEAMMATESComponentDetectionStrategy;
 import cipm.consistency.cpr.javapcm.teammates.TeammatesJavaPCMChangePropagationSpecification;
-import tools.vitruv.framework.propagation.ChangePropagationSpecification;
+import tools.vitruv.change.propagation.ChangePropagationSpecification;
 
 public class TEAMMATESCITest extends AbstractCITest {
 	private static final String COMMIT_TAG_V_8_10_0 = "fdfdcf1ebcabab50f11b01effa036d4c33ad6783";

@@ -13,7 +13,8 @@
 	url = https://github.com/HansMartinA/Vitruv-Applications-ComponentBasedSystems
 [submodule "Vitruv"]
 	path = Vitruv
-	url = https://github.com/HansMartinA/Vitruv
+	url = https://github.com/vitruv-tools/Vitruv
+	tag = 3.0.0
 [submodule "Palladio-Build-CodingConventions"]
 	path = Palladio-Build-CodingConventions
 	url = https://github.com/PalladioSimulator/Palladio-Build-CodingConventions

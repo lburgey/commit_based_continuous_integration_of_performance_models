@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 import cipm.consistency.commitintegration.diff.util.ComparisonBasedJaccardCoefficientCalculator;
 import cipm.consistency.commitintegration.diff.util.pcm.PCMModelComparator;
 import cipm.consistency.cpr.javapcm.CommitIntegrationJavaPCMChangePropagationSpecification;
-import tools.vitruv.framework.propagation.ChangePropagationSpecification;
+import tools.vitruv.change.propagation.ChangePropagationSpecification;
 
 /**
  * A test class for the TeaStore.

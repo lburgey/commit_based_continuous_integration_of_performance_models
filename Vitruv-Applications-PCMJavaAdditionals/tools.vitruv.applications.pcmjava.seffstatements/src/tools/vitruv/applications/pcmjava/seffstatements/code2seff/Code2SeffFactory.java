@@ -5,7 +5,7 @@ import org.somox.gast2seff.visitors.AbstractFunctionClassificationStrategy;
 import org.somox.gast2seff.visitors.InterfaceOfExternalCallFindingFactory;
 import org.somox.gast2seff.visitors.ResourceDemandingBehaviourForClassMethodFinding;
 
-import tools.vitruv.framework.correspondence.CorrespondenceModel;
+import tools.vitruv.change.correspondence.model.CorrespondenceModel;
 
 public interface Code2SeffFactory {
 

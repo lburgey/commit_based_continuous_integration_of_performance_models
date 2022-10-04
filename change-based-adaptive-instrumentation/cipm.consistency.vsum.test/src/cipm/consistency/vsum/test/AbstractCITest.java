@@ -21,7 +21,7 @@ import org.junit.jupiter.api.BeforeEach;
 import cipm.consistency.tools.evaluation.data.EvaluationDataContainer;
 import cipm.consistency.tools.evaluation.data.EvaluationDataContainerReaderWriter;
 import cipm.consistency.vsum.CommitIntegrationController;
-import tools.vitruv.framework.propagation.ChangePropagationSpecification;
+import tools.vitruv.change.propagation.ChangePropagationSpecification;
 
 /**
  * An abstract superclass for test cases providing the setup.
