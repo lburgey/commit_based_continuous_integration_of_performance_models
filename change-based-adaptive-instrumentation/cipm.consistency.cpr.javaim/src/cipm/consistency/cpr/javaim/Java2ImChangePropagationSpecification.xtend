@@ -8,12 +8,10 @@ import org.palladiosimulator.pcm.seff.ResourceDemandingSEFF
 import tools.vitruv.applications.pcmjava.seffstatements.code2seff.extended.ExtendedJava2PcmMethodBodyChangePreprocessor
 import tools.vitruv.change.atomic.EChange
 import tools.vitruv.change.atomic.feature.attribute.ReplaceSingleValuedEAttribute
-import tools.vitruv.change.correspondence.model.CorrespondenceModel
-import tools.vitruv.change.interaction.UserInteractor
-import tools.vitruv.change.propagation.ResourceAccess
 import tools.vitruv.change.correspondence.Correspondence
 import tools.vitruv.change.correspondence.view.CorrespondenceModelView
-import java.util.Set
+import tools.vitruv.change.interaction.UserInteractor
+import tools.vitruv.change.propagation.ResourceAccess
 
 /**
  * Propagates changes in method bodies to the extended instrumentation model.
@@ -28,8 +26,8 @@ class Java2ImChangePropagationSpecification<C extends Correspondence> extends Ex
 // met, the propagation rules for Java->IM extend the rules for Java->PCM and are executed after them.
 	
 	override propagateChange(EChange change, CorrespondenceModelView<C> correspondenceModelView, ResourceAccess resourceAccess) {
-		super.propagateChange(change, correspondenceModel, resourceAccess)
-		if (super.doesHandleChange(change, correspondenceModel)) {
+		super.propagateChange(change, correspondenceModelView, resourceAccess)
+		if (super.doesHandleChange(change, correspondenceModelView)) {
 			val attrChange = change as ReplaceSingleValuedEAttribute<?, ?>;
 			val meth = attrChange.affectedEObject as Method;
 			executeJava2ImTransformation(correspondenceModelView, userInteractor, meth)

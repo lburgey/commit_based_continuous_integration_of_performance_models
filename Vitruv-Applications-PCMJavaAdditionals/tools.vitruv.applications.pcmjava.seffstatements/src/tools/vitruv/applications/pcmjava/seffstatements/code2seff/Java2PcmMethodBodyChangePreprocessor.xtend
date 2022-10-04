@@ -1,22 +1,17 @@
 package tools.vitruv.applications.pcmjava.seffstatements.code2seff
 
+import org.emftext.language.java.commons.CommonsPackage
 import org.emftext.language.java.members.Method
 import org.palladiosimulator.pcm.repository.BasicComponent
+import org.somox.gast2seff.visitors.AbstractFunctionClassificationStrategy
 import org.somox.gast2seff.visitors.InterfaceOfExternalCallFindingFactory
 import org.somox.gast2seff.visitors.ResourceDemandingBehaviourForClassMethodFinding
-//import tools.vitruv.domains.pcm.PcmDomainProvider
+import tools.vitruv.change.atomic.EChange
+import tools.vitruv.change.atomic.feature.attribute.ReplaceSingleValuedEAttribute
 import tools.vitruv.change.correspondence.model.CorrespondenceModel
 import tools.vitruv.change.interaction.UserInteractor
-import tools.vitruv.change.propagation.impl.AbstractChangePropagationSpecification
 import tools.vitruv.change.propagation.ResourceAccess
-import tools.vitruv.change.atomic.EChange
-import org.somox.gast2seff.visitors.AbstractFunctionClassificationStrategy
-//import tools.vitruv.domains.java.JavaDomain
-//import tools.vitruv.domains.java.JavaDomainProvider
-//import tools.vitruv.change.echange.feature.attribute.ReplaceSingleValuedEAttribute
-import org.emftext.language.java.commons.CommonsPackage
-//import tools.vitruv.change.domains.AbstractVitruvDomain
-import tools.vitruv.change.atomic.feature.attribute.ReplaceSingleValuedEAttribute
+import tools.vitruv.change.propagation.impl.AbstractChangePropagationSpecification
 
 class Java2PcmMethodBodyChangePreprocessor extends AbstractChangePropagationSpecification {
 	val Code2SeffFactory code2SeffFactory;
