@@ -31,9 +31,9 @@ import cipm.consistency.commitintegration.settings.SettingKeys;
 //import cipm.consistency.domains.pcm.ExtendedPcmDomain;
 //import cipm.consistency.domains.pcm.ExtendedPcmDomainProvider;
 import mir.reactions.imUpdate.ImUpdateChangePropagationSpecification;
+import mir.reactions.luaPcm.LuaPcmChangePropagationSpecification;
 import tools.vitruv.change.interaction.UserInteractionFactory;
 import tools.vitruv.change.propagation.ChangePropagationSpecification;
-import tools.vitruv.change.propagation.ChangePropagationSpecificationProvider;
 import tools.vitruv.change.propagation.impl.DefaultChangeRecordingModelRepository;
 import tools.vitruv.framework.views.CommittableView;
 import tools.vitruv.framework.views.ViewTypeFactory;
@@ -87,9 +87,8 @@ public class VSUMFacade {
 	
 	
 	private VirtualModelBuilder getVsumBuilder(Collection<ChangePropagationSpecification> changeSpecs) {
-		// TODO add the three domains to the specs
-		
-		
+		// the lua->pcm spec is always added
+		changeSpecs.add(new LuaPcmChangePropagationSpecification());
 		
 
 //		ExtendedPcmDomain pcmDomain = new ExtendedPcmDomainProvider().getDomain();
@@ -128,6 +127,7 @@ public class VSUMFacade {
 		pcm.syncWithFilesystem(filePCM);
 		imm = InstrumentationModelFactory.eINSTANCE.createInstrumentationModel();
 		FileBackedModelUtil.synchronize(imm, file.getImPath().toFile(), InstrumentationModel.class);
+		
 
 		// TODO find out how the view based change propagation works
 //			vsum.propagateChangedState(imm.eResource());
