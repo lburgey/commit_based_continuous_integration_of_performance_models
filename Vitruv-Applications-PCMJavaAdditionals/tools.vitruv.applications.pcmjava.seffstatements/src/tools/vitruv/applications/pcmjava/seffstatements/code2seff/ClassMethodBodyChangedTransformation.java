@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.emftext.language.java.members.ClassMethod;
 import org.emftext.language.java.members.Method;
@@ -80,30 +81,30 @@ public class ClassMethodBodyChangedTransformation {
 	 * new AbstractAction 2 Method correspondences for the new method (and its inner
 	 * methods).
 	 * 
-	 * @param correspondenceModel the current correspondence model.
+	 * @param correspondenceModelView the current correspondence model.
 	 * @param userInteracting     the user interactor.
 	 */
-	public void execute(final CorrespondenceModel correspondenceModel, final UserInteractor userInteracting) {
-		if (!this.isArchitectureRelevantChange(correspondenceModel)) {
+	public void execute(final EditableCorrespondenceModelView<Correspondence> correspondenceModelView, final UserInteractor userInteracting) {
+		if (!this.isArchitectureRelevantChange(correspondenceModelView)) {
 			LOGGER.debug("Change within the method: " + this.newMethod + " is not an architecture relevant change");
 			return;
 		}
 
 		// 1)
-		this.removeCorrespondingAbstractActions(correspondenceModel);
+		this.removeCorrespondingAbstractActions(correspondenceModelView);
 
 		// 2)
 		final ResourceDemandingBehaviour resourceDemandingBehaviour = this
-				.findRdBehaviorToInsertElements(correspondenceModel);
+				.findRdBehaviorToInsertElements(correspondenceModelView);
 		final BasicComponent basicComponent = this.basicComponentFinder.findBasicComponentForMethod(this.newMethod,
-				correspondenceModel);
+				correspondenceModelView);
 		this.executeSoMoXForMethod(basicComponent, resourceDemandingBehaviour);
 
 		// 3)
 		this.connectCreatedResourceDemandingBehaviour(resourceDemandingBehaviour);
 
 		// 4)
-		this.createNewCorrespondences(correspondenceModel, resourceDemandingBehaviour);
+		this.createNewCorrespondences(correspondenceModelView, resourceDemandingBehaviour);
 	}
 
 	/**
@@ -114,13 +115,13 @@ public class ClassMethodBodyChangedTransformation {
 	 * @param ci the current correspondence model.
 	 * @return true if the method is architecture relevant. false otherwise.
 	 */
-	protected boolean isArchitectureRelevantChange(final CorrespondenceModel cm) {
-		return this.isMethodArchitectureRelevant(this.newMethod, cm);
+	protected boolean isArchitectureRelevantChange(final EditableCorrespondenceModelView<Correspondence> cmv) {
+		return this.isMethodArchitectureRelevant(this.newMethod, cmv);
 	}
 
-	private boolean isMethodArchitectureRelevant(final Method method, final CorrespondenceModel cm) {
+	private boolean isMethodArchitectureRelevant(final Method method, final EditableCorrespondenceModelView<Correspondence> cmv) {
 		if (null != method) {
-			final var correspondingEObjectsByType = cm.getCorrespondingEObjects(Correspondence.class, List.of(method), null);
+			final var correspondingEObjectsByType = cmv.getCorrespondingEObjects(method, null);
 			if (null != correspondingEObjectsByType && !correspondingEObjectsByType.isEmpty()) {
 				return true;
 			}
@@ -158,14 +159,10 @@ public class ClassMethodBodyChangedTransformation {
 
 	}
 
-	protected void createNewCorrespondences(final CorrespondenceModel cm,
+	protected void createNewCorrespondences(final EditableCorrespondenceModelView<Correspondence> cmv,
 			final ResourceDemandingBehaviour newResourceDemandingBehaviourElements) {
 		for (final AbstractAction abstractAction : newResourceDemandingBehaviourElements.getSteps_Behaviour()) {
-			cm.addCorrespondenceBetween(List.of(abstractAction), List.of(this.newMethod), null, class Foo extends Supplier<T> {
-				private T get() {
-					return Correspondence.class;
-				}
-			}
+		    cmv.addCorrespondenceBetween(abstractAction, this.newMethod, null);
 		}
 	}
 
@@ -184,8 +181,8 @@ public class ClassMethodBodyChangedTransformation {
 		VisitorUtils.connectActions(rdBehavior);
 	}
 
-	private void removeCorrespondingAbstractActions(final CorrespondenceModel cm) {
-		final var correspondingAbstractActions = cm.getCorrespondingEObjects(Correspondence.class, List.of(newMethod), null);
+	private void removeCorrespondingAbstractActions(final EditableCorrespondenceModelView<Correspondence> cmv) {
+		final var correspondingAbstractActions = cmv.getCorrespondingEObjects(newMethod, null);
 		if (null == correspondingAbstractActions) {
 			return;
 		}
@@ -197,8 +194,8 @@ public class ClassMethodBodyChangedTransformation {
 		if (resourceDemandingBehaviour instanceof ResourceDemandingSEFF) {
 			((ResourceDemandingSEFF) resourceDemandingBehaviour).getResourceDemandingInternalBehaviours().clear();
 		}
-		for (final AbstractAction correspondingAbstractAction : correspondingAbstractActions) {
-			cm.removeCorrespondencesFor(Lists.newArrayList(correspondingAbstractAction), null);
+		for (final EObject correspondingAbstractAction : correspondingAbstractActions) {
+			cmv.removeCorrespondencesBetween(newMethod, correspondingAbstractAction, null);
 			EcoreUtil.remove(correspondingAbstractAction);
 		}
 
@@ -211,9 +208,10 @@ public class ClassMethodBodyChangedTransformation {
 	}
 
 	private ResourceDemandingBehaviour getAndValidateResourceDemandingBehavior(
-			final Set<AbstractAction> correspondingAbstractActions) {
+			final Set<EObject> correspondingAbstractActions) {
 		ResourceDemandingBehaviour resourceDemandingBehaviour = null;
-		for (final AbstractAction abstractAction : correspondingAbstractActions) {
+		for (final EObject eObj : correspondingAbstractActions) {
+		    AbstractAction abstractAction = (AbstractAction) eObj;
 			if (null == abstractAction.getResourceDemandingBehaviour_AbstractAction()) {
 				LOGGER.warn("AbstractAction " + abstractAction
 						+ " does not have a parent ResourceDemandingBehaviour - this should not happen.");
@@ -234,8 +232,8 @@ public class ClassMethodBodyChangedTransformation {
 		return resourceDemandingBehaviour;
 	}
 
-	protected ResourceDemandingBehaviour findRdBehaviorToInsertElements(final CorrespondenceModel cm) {
-		final var correspondingResourceDemandingBehaviours = cm.getCorrespondingEObjects(Correspondence.class, List.of(this.newMethod), null);
+	protected ResourceDemandingBehaviour findRdBehaviorToInsertElements(final EditableCorrespondenceModelView<Correspondence> cmv) {
+		final var correspondingResourceDemandingBehaviours = cmv.getCorrespondingEObjects(this.newMethod, null);
 		if (null == correspondingResourceDemandingBehaviours || correspondingResourceDemandingBehaviours.isEmpty()) {
 			LOGGER.warn("No ResourceDemandingBehaviours found for method " + this.newMethod
 					+ ". Could not create ResourceDemandingBehavoir to insert SEFF elements");
