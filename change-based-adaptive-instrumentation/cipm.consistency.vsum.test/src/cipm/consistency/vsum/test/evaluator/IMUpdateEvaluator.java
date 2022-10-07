@@ -1,4 +1,4 @@
-package cipm.consistency.vsum.test;
+package cipm.consistency.vsum.test.evaluator;
 
 import java.io.File;
 import java.util.ArrayList;

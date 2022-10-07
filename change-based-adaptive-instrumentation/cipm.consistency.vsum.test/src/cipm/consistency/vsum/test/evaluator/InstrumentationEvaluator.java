@@ -1,4 +1,4 @@
-package cipm.consistency.vsum.test;
+package cipm.consistency.vsum.test.evaluator;
 
 import cipm.consistency.base.models.instrumentation.InstrumentationModel.InstrumentationModel;
 import cipm.consistency.commitintegration.JavaFileSystemLayout;

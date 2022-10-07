@@ -1,4 +1,4 @@
-package cipm.consistency.vsum.test.deployment;
+package cipm.consistency.vsum.test.ci.deployment;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,7 +34,7 @@ import cipm.consistency.base.shared.pcm.InMemoryPCM;
 import cipm.consistency.base.shared.pcm.LocalFilesystemPCM;
 import cipm.consistency.commitintegration.settings.CommitIntegrationSettingsContainer;
 import cipm.consistency.commitintegration.settings.SettingKeys;
-import cipm.consistency.vsum.test.TeaStoreCITest;
+import cipm.consistency.vsum.test.ci.TeaStoreCITest;
 
 /**
  * Provides utility methods for the deployment of the instrumented code.

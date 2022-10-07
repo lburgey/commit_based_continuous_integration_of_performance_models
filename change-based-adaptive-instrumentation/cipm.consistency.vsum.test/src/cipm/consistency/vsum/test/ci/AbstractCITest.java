@@ -1,8 +1,11 @@
-package cipm.consistency.vsum.test;
+package cipm.consistency.vsum.test.ci;
 
 import cipm.consistency.tools.evaluation.data.EvaluationDataContainer;
 import cipm.consistency.tools.evaluation.data.EvaluationDataContainerReaderWriter;
 import cipm.consistency.vsum.CommitIntegrationController;
+import cipm.consistency.vsum.test.evaluator.IMUpdateEvaluator;
+import cipm.consistency.vsum.test.evaluator.InstrumentationEvaluator;
+import cipm.consistency.vsum.test.evaluator.JavaModelEvaluator;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
