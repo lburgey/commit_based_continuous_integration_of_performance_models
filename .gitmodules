@@ -18,3 +18,6 @@
 [submodule "Palladio-Build-CodingConventions"]
 	path = Palladio-Build-CodingConventions
 	url = https://github.com/PalladioSimulator/Palladio-Build-CodingConventions
+[submodule "change-based-adaptive-instrumentation/cipm.consistency.vsum.test/testProjects/caseStudy1"]
+	path = change-based-adaptive-instrumentation/cipm.consistency.vsum.test/testProjects/caseStudy1
+	url = ../../../git.scc.kit.edu/luaCIPM/caseStudy1
