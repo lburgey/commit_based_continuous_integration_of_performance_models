@@ -1,18 +1,5 @@
 package cipm.consistency.vsum.test;
 
-import java.nio.file.Files;
-import java.util.HashSet;
-import java.util.Set;
-
-import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.emftext.language.java.commons.Commentable;
-import org.emftext.language.java.members.Method;
-import org.emftext.language.java.statements.Return;
-import org.emftext.language.java.statements.Statement;
-import org.palladiosimulator.pcm.repository.OperationSignature;
-
 import cipm.consistency.base.models.instrumentation.InstrumentationModel.InstrumentationModel;
 import cipm.consistency.commitintegration.JavaFileSystemLayout;
 import cipm.consistency.commitintegration.JavaParserAndPropagatorUtils;
@@ -20,8 +7,17 @@ import cipm.consistency.commitintegration.diff.util.JavaChangedMethodDetectorDif
 import cipm.consistency.commitintegration.diff.util.JavaModelComparator;
 import cipm.consistency.tools.evaluation.data.EvaluationDataContainer;
 import cipm.consistency.tools.evaluation.data.InstrumentationEvaluationData;
+import java.nio.file.Files;
+import java.util.HashSet;
+import java.util.Set;
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.emftext.language.java.members.Method;
+import org.emftext.language.java.statements.Return;
+import org.emftext.language.java.statements.Statement;
+import org.palladiosimulator.pcm.repository.OperationSignature;
 import tools.vitruv.change.correspondence.Correspondence;
-import tools.vitruv.change.correspondence.model.CorrespondenceModel;
 //import tools.vitruv.domains.java.tuid.JamoppStringOperations;
 //import tools.vitruv.changes.correspondence.model.CorrespondenceModel;
 //import tools.vitruv.change.correspondence.util.CorrespondenceModelUtil;
@@ -33,7 +29,7 @@ import tools.vitruv.change.correspondence.view.CorrespondenceModelView;
  * @author Martin Armbruster
  */
 @SuppressWarnings("restriction")
-public class InstrumentationEvaluator <C extends Correspondence>{
+public class InstrumentationEvaluator {
 	private final int numberAdditionalStatements = 10;
 	private final int numberServiceStatements = 7;
 	private final int numberStatementsPerParameter = 1;
@@ -53,7 +49,7 @@ public class InstrumentationEvaluator <C extends Correspondence>{
 	 * @param cm                the correspondence model.
 	 */
 	public void evaluateInstrumentationDependently(InstrumentationModel im, Resource javaModel,
-			Resource instrumentedModel, CorrespondenceModelView<C> cmv) {
+			Resource instrumentedModel, CorrespondenceModelView<Correspondence> cmv) {
 		if (instrumentedModel == null || instrumentedModel.getContents().isEmpty()) {
 			return;
 		}
@@ -75,7 +71,7 @@ public class InstrumentationEvaluator <C extends Correspondence>{
 	 * @param cm         the correspondence model.
 	 */
 	public void evaluateInstrumentationIndependently(InstrumentationModel im,
-			Resource javaModel, JavaFileSystemLayout fileLayout, CorrespondenceModelView<C> cmv) {
+			Resource javaModel, JavaFileSystemLayout fileLayout, CorrespondenceModelView<Correspondence> cmv) {
 		if (Files.notExists(fileLayout.getInstrumentationCopy())) {
 			return;
 		}
@@ -122,7 +118,7 @@ public class InstrumentationEvaluator <C extends Correspondence>{
 		return statements;
 	}
 
-	private int countExpectedStatements(InstrumentationModel im, CorrespondenceModelView<C> cmv, boolean lowerCount) {
+	private int countExpectedStatements(InstrumentationModel im, CorrespondenceModelView<Correspondence> cmv, boolean lowerCount) {
 		int statements = numberAdditionalStatements;
 		for (var sip : im.getPoints()) {
 			statements += numberServiceStatements;
@@ -165,17 +161,17 @@ public class InstrumentationEvaluator <C extends Correspondence>{
 
 	private String convertToString(Method method) {
 		StringBuilder builder = new StringBuilder();
-		builder.append(method.getContainingConcreteClassifier().getQualifiedName());
-		builder.append("::");
-		builder.append(method.getName());
-		builder.append("(");
-		for (var param : method.getParameters()) {
-			builder.append(JamoppStringOperations.getStringRepresentation(param));
-			builder.append(",");
-		}
-		builder.append(")");
-		builder.append(JamoppStringOperations.getStringRepresentation(method.getTypeReference().getTarget(),
-				method.getTypeReference().getArrayDimension()));
+//		builder.append(method.getContainingConcreteClassifier().getQualifiedName());
+//		builder.append("::");
+//		builder.append(method.getName());
+//		builder.append("(");
+//		for (var param : method.getParameters()) {
+//			builder.append(JamoppStringOperations.getStringRepresentation(param));
+//			builder.append(",");
+//		}
+//		builder.append(")");
+//		builder.append(JamoppStringOperations.getStringRepresentation(method.getTypeReference().getTarget(),
+//				method.getTypeReference().getArrayDimension()));
 		return builder.toString();
 	}
 }

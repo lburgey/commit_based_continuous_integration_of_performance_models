@@ -16,7 +16,6 @@ Require-Bundle:
  jamopp.parser,
  jamopp.parser.jdt.singlefile,
  jamopp.resource,
- cipm.consistency.cpr.javapcm.msa,
  tools.vitruv.applications.pcmjava.seffstatements.extended,
  cipm.consistency.base.shared,
  cipm.consistency.models.instrumentation,
@@ -27,6 +26,6 @@ Require-Bundle:
  cipm.consistency.commitintegration.settings,
  cipm.consistency.designtime.instrumentation2,
  cipm.consistency.tools.evaluation.data,
- cipm.consistency.cpr.javapcm.additional.validation,
- cipm.consistency.cpr.luacpm
+ cipm.consistency.cpr.luacpm,
+ cipm.consistency.cpr.javapcm.additional.validation;bundle-version="1.0.0"
 Export-Package: cipm.consistency.vsum
