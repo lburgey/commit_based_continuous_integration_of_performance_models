@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.ConsoleAppender;
@@ -22,7 +23,6 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import tools.vitruv.change.propagation.ChangePropagationSpecification;
 
 /**
  * An abstract superclass for test cases providing the setup.
@@ -33,6 +33,13 @@ import tools.vitruv.change.propagation.ChangePropagationSpecification;
 public abstract class AbstractCITest {
     private static final Logger LOGGER = Logger.getLogger("cipm." + AbstractCITest.class.getSimpleName());
     protected CommitIntegrationController controller;
+    
+    protected String buildPath(String... segments) {
+        var allSegments = new ArrayList<String>();
+        allSegments.add("ciTestData");
+        allSegments.addAll(Arrays.asList(segments));
+        return String.join(File.separator, allSegments);
+    }
 
     @BeforeEach
     public void setUp() throws Exception {
@@ -211,10 +218,10 @@ public abstract class AbstractCITest {
      */
     protected abstract String getSettingsPath();
 
-    /**
-     * Returns the CPRs between Java and the PCM.
-     * 
-     * @return the CPRs.
-     */
-    protected abstract ChangePropagationSpecification getJavaPCMSpecification();
+//    /**
+//     * Returns the CPRs between Java and the PCM.
+//     * 
+//     * @return the CPRs.
+//     */
+//    protected abstract ChangePropagationSpecification getJavaPCMSpecification();
 }

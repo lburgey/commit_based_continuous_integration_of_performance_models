@@ -28,7 +28,6 @@ import tools.vitruv.change.correspondence.view.CorrespondenceModelView;
  * 
  * @author Martin Armbruster
  */
-@SuppressWarnings("restriction")
 public class InstrumentationEvaluator {
 	private final int numberAdditionalStatements = 10;
 	private final int numberServiceStatements = 7;

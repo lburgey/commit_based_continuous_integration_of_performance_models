@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import cipm.consistency.commitintegration.diff.util.ComparisonBasedJaccardCoefficientCalculator;
 import cipm.consistency.commitintegration.diff.util.pcm.PCMModelComparator;
-import cipm.consistency.cpr.javapcm.CommitIntegrationJavaPCMChangePropagationSpecification;
+//import cipm.consistency.cpr.javapcm.CommitIntegrationJavaPCMChangePropagationSpecification;
 import tools.vitruv.change.propagation.ChangePropagationSpecification;
 
 /**
@@ -172,8 +172,8 @@ public class TeaStoreCITest extends AbstractCITest {
 		System.out.println(res);
 	}
 
-	@Override
-	protected ChangePropagationSpecification getJavaPCMSpecification() {
-		return new CommitIntegrationJavaPCMChangePropagationSpecification();
-	}
+//	@Override
+//	protected ChangePropagationSpecification getJavaPCMSpecification() {
+//		return new CommitIntegrationJavaPCMChangePropagationSpecification();
+//	}
 }

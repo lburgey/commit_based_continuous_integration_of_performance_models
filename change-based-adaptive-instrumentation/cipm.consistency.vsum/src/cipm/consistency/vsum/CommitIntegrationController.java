@@ -25,7 +25,7 @@ import cipm.consistency.commitintegration.CommitChangePropagator;
 import cipm.consistency.commitintegration.ExternalCommandExecutionUtils;
 import cipm.consistency.commitintegration.settings.CommitIntegrationSettingsContainer;
 import cipm.consistency.commitintegration.settings.SettingKeys;
-import cipm.consistency.cpr.javapcm.additional.validation.ExternalCallEmptyTargetFiller;
+//import cipm.consistency.cpr.javapcm.additional.validation.ExternalCallEmptyTargetFiller;
 import cipm.consistency.designtime.instrumentation2.CodeInstrumenter;
 import cipm.consistency.tools.evaluation.data.EvaluationDataContainer;
 
@@ -140,14 +140,15 @@ public class CommitIntegrationController {
             .setChangePropagationTime(fineTimer);
 
         if (result) {
-            @SuppressWarnings("restriction")
-            ExternalCallEmptyTargetFiller filler = new ExternalCallEmptyTargetFiller(facade.getVSUM()
-                .getCorrespondenceModel(),
-                    facade.getPCMWrapper()
-                        .getRepository(),
-                    propagator.getJavaFileSystemLayout()
-                        .getExternalCallTargetPairsFile());
-            filler.fillExternalCalls();
+            // TODO out commented this
+//            @SuppressWarnings("restriction")
+//            ExternalCallEmptyTargetFiller filler = new ExternalCallEmptyTargetFiller(facade.getVSUM()
+//                .getCorrespondenceModel(),
+//                    facade.getPCMWrapper()
+//                        .getRepository(),
+//                    propagator.getJavaFileSystemLayout()
+//                        .getExternalCallTargetPairsFile());
+//            filler.fillExternalCalls();
 
             boolean hasChangedIM = false;
             for (var sip : this.facade.getInstrumentationModel()

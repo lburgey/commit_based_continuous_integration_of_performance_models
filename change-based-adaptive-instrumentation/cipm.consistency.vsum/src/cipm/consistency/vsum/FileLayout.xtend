@@ -1,8 +1,11 @@
 package cipm.consistency.vsum
 
-import org.eclipse.emf.common.util.URI
+import java.nio.file.Files
 import java.nio.file.Path
+import java.util.Arrays
+import org.eclipse.emf.common.util.URI
 import org.eclipse.xtend.lib.annotations.Accessors
+import org.apache.commons.io.FileUtils
 
 /**
  * Internal layout for the file and directory structure.
@@ -58,5 +61,13 @@ class FileLayout {
 		imURI = URI.createFileURI(imPath.toString());
 		javaPath = rootDir.resolve(javaDirName);
 		commitsPath = rootDir.resolve(commitsFileName);
+	}
+	
+	def exists() {
+		false
+	}
+	
+	def delete() {
+		FileUtils.deleteDirectory(vsumPath.toFile)
 	}
 }

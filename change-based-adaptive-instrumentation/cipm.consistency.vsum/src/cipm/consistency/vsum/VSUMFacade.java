@@ -10,15 +10,11 @@ import cipm.consistency.commitintegration.settings.SettingKeys;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.List;
-//import cipm.consistency.domains.im.InstrumentationModelDomainProvider;
-//import cipm.consistency.domains.java.AdjustedJavaDomainProvider;
-//import cipm.consistency.domains.pcm.ExtendedPcmDomain;
-//import cipm.consistency.domains.pcm.ExtendedPcmDomainProvider;
 import mir.reactions.imUpdate.ImUpdateChangePropagationSpecification;
 import mir.reactions.luaPcm.LuaPcmChangePropagationSpecification;
+import org.apache.log4j.Logger;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.palladiosimulator.pcm.allocation.Allocation;
 import org.palladiosimulator.pcm.allocation.AllocationFactory;
@@ -34,7 +30,7 @@ import tools.vitruv.change.interaction.UserInteractionFactory;
 import tools.vitruv.change.propagation.ChangePropagationSpecification;
 import tools.vitruv.framework.views.CommittableView;
 import tools.vitruv.framework.views.ViewTypeFactory;
-//import tools.vitruv.dsls.reactions.runtime.helper.ReactionsCorrespondenceHelper;
+import tools.vitruv.framework.views.changederivation.DefaultStateBasedChangeResolutionStrategy;
 import tools.vitruv.framework.vsum.VirtualModelBuilder;
 import tools.vitruv.framework.vsum.internal.InternalVirtualModel;
 
@@ -45,19 +41,23 @@ import tools.vitruv.framework.vsum.internal.InternalVirtualModel;
  */
 @SuppressWarnings("restriction")
 public class VSUMFacade {
+    private static final Logger LOGGER = Logger.getLogger("cipm.VSUMFacade");
     private File file;
     private InternalVirtualModel vsum;
     private InMemoryPCM pcm;
     private InstrumentationModel imm;
 
-    public VSUMFacade(Path rootDir, ChangePropagationSpecification... changeSpecs) {
+    public VSUMFacade(Path rootDir) throws IOException {
         file = new File(rootDir);
-        loadOrCreateVsum(changeSpecs);
+        loadOrCreateVsum();
     }
 
-    /*
-    private void setUp2(Collection<ChangePropagationSpecification> changePropagationSpecs) {
-        boolean isVSUMExistent = Files.exists(file.getVsumPath());
+    private List<ChangePropagationSpecification> getChangePropagationSpecs() {
+        List<ChangePropagationSpecification> changePropagationSpecs = new ArrayList<>();
+
+        // the lua->pcm spec is always added
+        changePropagationSpecs.add(new LuaPcmChangePropagationSpecification());
+
         boolean useImUpdateChangeSpec = CommitIntegrationSettingsContainer.getSettingsContainer()
             .getPropertyAsBoolean(SettingKeys.PERFORM_FINE_GRAINED_SEFF_RECONSTRUCTION)
                 || CommitIntegrationSettingsContainer.getSettingsContainer()
@@ -66,28 +66,10 @@ public class VSUMFacade {
         if (useImUpdateChangeSpec)
             changePropagationSpecs.add(new ImUpdateChangePropagationSpecification());
 
-        vsum = getVsumBuilder(changePropagationSpecs).buildAndInitialize();
-        var resourceUris = Arrays.asList(file.getPcmRepositoryURI(), file.getPcmAllocationURI(), file.getPcmSystemURI(),
-                file.getPcmResourceEnvironmentURI(), file.getPcmUsageModelURI(), file.getImURI());
-
-        var correspondenceUri = URI.createURI("foobar");
-        var metaDataPath = Path.of(".metaData");
-
-        try (var modelRepo = new DefaultChangeRecordingModelRepository(correspondenceUri, metaDataPath)) {
-
-            // load all resources
-            resourceUris.forEach(uri -> modelRepo.getModelResource(uri));
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        return changePropagationSpecs;
     }
-    */
 
-    private VirtualModelBuilder getVsumBuilder(Collection<ChangePropagationSpecification> changeSpecs) {
-        // the lua->pcm spec is always added
-        changeSpecs.add(new LuaPcmChangePropagationSpecification());
-
+    private VirtualModelBuilder getVsumBuilder() {
 //		ExtendedPcmDomain pcmDomain = new ExtendedPcmDomainProvider().getDomain();
 //		pcmDomain.enableTransitiveChangePropagation();
 
@@ -97,24 +79,37 @@ public class VSUMFacade {
 //				.withDomain(new InstrumentationModelDomainProvider().getDomain())
             .withStorageFolder(file.getVsumPath())
             .withUserInteractor(UserInteractionFactory.instance.createDialogUserInteractor())
-            .withChangePropagationSpecifications(changeSpecs);
+            .withChangePropagationSpecifications(getChangePropagationSpecs());
     }
 
-    private CommittableView getView() {
+    private CommittableView getView(InternalVirtualModel theVsum) {
         // TODO i think "myView" should be a magic string
         var viewType = ViewTypeFactory.createIdentityMappingViewType("myView");
-        viewType.createSelector(vsum);
-        var viewSelector = vsum.createSelector(viewType);
+        viewType.createSelector(theVsum);
+
+        // TODO From the docs: you receive a selector that allows you to select the elements you
+        // want to have in your view.
+        var viewSelector = theVsum.createSelector(viewType);
+        LOGGER.debug(String.format("View sees: %s", viewSelector.getSelectableElements()));
+
+        // Selecting all elements here
+        viewSelector.getSelectableElements()
+            .forEach(ele -> viewSelector.setSelected(ele, true));
+
+        var resolutionStrategy = new DefaultStateBasedChangeResolutionStrategy();
         var view = viewSelector.createView()
-            .withChangeDerivingTrait();
+            .withChangeDerivingTrait(resolutionStrategy);
         return view;
     }
 
     private void createVsum(VirtualModelBuilder vsumBuilder) {
-        InternalVirtualModel interimVsum = vsumBuilder.buildAndInitialize();
-        var filePCM = file.getPCM();
-        var pcm = new InMemoryPCM();
+        // temporary vsum for the initialization
+        LOGGER.info("Creating temporary VSUM");
+        final var tempVsum = vsumBuilder.buildAndInitialize();
 
+        // build PCM
+        final var filePCM = file.getPCM();
+        pcm = new InMemoryPCM();
         pcm.setRepository(RepositoryFactory.eINSTANCE.createRepository());
         pcm.setSystem(SystemFactory.eINSTANCE.createSystem());
         pcm.setResourceEnvironmentModel(ResourceenvironmentFactory.eINSTANCE.createResourceEnvironment());
@@ -125,19 +120,14 @@ public class VSUMFacade {
             .setTargetResourceEnvironment_Allocation(pcm.getResourceEnvironmentModel());
         pcm.setUsageModel(UsagemodelFactory.eINSTANCE.createUsageModel());
         pcm.syncWithFilesystem(filePCM);
+
+        // build IMM
         imm = InstrumentationModelFactory.eINSTANCE.createInstrumentationModel();
         FileBackedModelUtil.synchronize(imm, file.getImPath()
             .toFile(), InstrumentationModel.class);
 
-        // TODO find out how the view based change propagation works
-//			vsum.propagateChangedState(imm.eResource());
-//			vsum.propagateChangedState(pcm.getRepository().eResource());
-//			vsum.propagateChangedState(pcm.getResourceEnvironmentModel().eResource());
-//			vsum.propagateChangedState(pcm.getSystem().eResource());
-//			vsum.propagateChangedState(pcm.getAllocationModel().eResource());
-//			vsum.propagateChangedState(pcm.getUsageModel().eResource());
-
-        final var resources = Arrays.asList(imm.eResource(), pcm.getRepository()
+        final var view = getView(tempVsum);
+        List.of(imm.eResource(), pcm.getRepository()
             .eResource(),
                 pcm.getResourceEnvironmentModel()
                     .eResource(),
@@ -146,53 +136,69 @@ public class VSUMFacade {
                 pcm.getAllocationModel()
                     .eResource(),
                 pcm.getUsageModel()
-                    .eResource());
+                    .eResource())
+            .forEach(resource -> {
+                // add resources by registering its root object in the change deriving view
+                LOGGER.debug(String.format("Registering resource: %s", resource.toString()));
+                var iterator = resource.getAllContents();
+                var rootEobject = iterator.next();
+                try {
+                    view.registerRoot(rootEobject, resource.getURI());
+                } catch (IllegalStateException e) {
+                    LOGGER.error(String.format("Unable to register root object of resource %s", resource.toString()),
+                            e);
+                }
+            });
 
-        final var view = getView();
-
-        resources.forEach(r -> {
-            // TODO we need to build the changes using the ChangeDerivingView
-
-            // we don't have to call vsum.propagateChange(...)
-            // we instead use this:
-            view.commitChangesAndUpdate();
-        });
-
-        interimVsum.getCorrespondenceModel()
-            .addCorrespondenceBetween(pcm.getRepository(), RepositoryPackage.Literals.REPOSITORY, null);
-        var correspondence = interimVsum.getCorrespondenceModel()
-            .addCorrespondenceBetween(imm, InstrumentationModelPackage.Literals.INSTRUMENTATION_MODEL, null);
+        // propagate the registerred resources into the vsum
         try {
-            correspondence.eResource()
-                .save(null);
-            interimVsum.dispose();
-        } catch (IOException e) {
+            var propagated = view.commitChangesAndUpdate();
+            LOGGER.debug(String.format("Propagating %d changes to temporary VSUM", propagated.size()));
+        } catch (IllegalStateException e) {
+            LOGGER.error("Unable to commit changes", e);
+            throw e;
         }
 
+        // add correspondences between the models
+        var correspondenceModel = tempVsum.getCorrespondenceModel();
+        correspondenceModel.addCorrespondenceBetween(pcm.getRepository(), RepositoryPackage.Literals.REPOSITORY, null);
+        correspondenceModel.addCorrespondenceBetween(imm, InstrumentationModelPackage.Literals.INSTRUMENTATION_MODEL,
+                null);
+
+        // TODO we cannot access the correspondence model view resource
+//        try {
+//            correspondenceModel.eResource()
+//                .save(null);
+//        } catch (IOException e) {
+//        }
+
+        LOGGER.debug("Disposing temporary VSUM");
+        tempVsum.dispose();
     }
 
-    private void loadOrCreateVsum(ChangePropagationSpecification... changeSpecs) {
-        boolean useImUpdateChangeSpec = CommitIntegrationSettingsContainer.getSettingsContainer()
-            .getPropertyAsBoolean(SettingKeys.PERFORM_FINE_GRAINED_SEFF_RECONSTRUCTION)
-                || CommitIntegrationSettingsContainer.getSettingsContainer()
-                    .getPropertyAsBoolean(SettingKeys.USE_PCM_IM_CPRS);
-        
-        List<ChangePropagationSpecification> allSpecs = Arrays.asList(changeSpecs);
-
-        if (useImUpdateChangeSpec)
-            allSpecs.add(new ImUpdateChangePropagationSpecification());
-
-        var vsumBuilder = getVsumBuilder(allSpecs);
-
+    private void loadOrCreateVsum() throws IOException {
+        var vsumBuilder = getVsumBuilder();
+        boolean overwrite = true;
         boolean isVsumExistent = Files.exists(file.getVsumPath());
-        if (!isVsumExistent)
-            createVsum(vsumBuilder);
 
-        vsum = vsumBuilder.buildAndInitialize();
+        if (overwrite && isVsumExistent) {
+            LOGGER.info("Deleting existing VSUM");
+            file.delete();
+            isVsumExistent = false;
+        }
+        if (!isVsumExistent || overwrite) {
+            createVsum(vsumBuilder);
+        }
 
         pcm = new InMemoryPCM();
 
-        // load InMemoryPCM from vsum
+        LOGGER.info("Loading VSUM");
+        vsum = vsumBuilder.buildAndInitialize();
+        // TODO im trying to add the resources below via this view
+        getView(vsum);
+
+        // load the in-memory PCM into the VSUM
+        LOGGER.info("Binding PCM models from VSUM");
         Resource resource = vsum.getModelInstance(file.getPcmRepositoryURI())
             .getResource();
         pcm.setRepository((Repository) resource.getContents()
@@ -215,6 +221,8 @@ public class VSUMFacade {
             .get(0));
         resource = vsum.getModelInstance(file.getImURI())
             .getResource();
+
+        LOGGER.info("Binding IMM");
         imm = (InstrumentationModel) resource.getContents()
             .get(0);
     }
@@ -234,4 +242,28 @@ public class VSUMFacade {
     public InMemoryPCM getPCMWrapper() {
         return pcm;
     }
+
+    /*
+     * private void setUp2(Collection<ChangePropagationSpecification> changePropagationSpecs) {
+     * boolean isVSUMExistent = Files.exists(file.getVsumPath()); boolean useImUpdateChangeSpec =
+     * CommitIntegrationSettingsContainer.getSettingsContainer()
+     * .getPropertyAsBoolean(SettingKeys.PERFORM_FINE_GRAINED_SEFF_RECONSTRUCTION) ||
+     * CommitIntegrationSettingsContainer.getSettingsContainer()
+     * .getPropertyAsBoolean(SettingKeys.USE_PCM_IM_CPRS);
+     * 
+     * if (useImUpdateChangeSpec) changePropagationSpecs.add(new
+     * ImUpdateChangePropagationSpecification());
+     * 
+     * vsum = getVsumBuilder(changePropagationSpecs).buildAndInitialize(); var resourceUris =
+     * Arrays.asList(file.getPcmRepositoryURI(), file.getPcmAllocationURI(), file.getPcmSystemURI(),
+     * file.getPcmResourceEnvironmentURI(), file.getPcmUsageModelURI(), file.getImURI());
+     * 
+     * var correspondenceUri = URI.createURI("foobar"); var metaDataPath = Path.of(".metaData");
+     * 
+     * try (var modelRepo = new DefaultChangeRecordingModelRepository(correspondenceUri,
+     * metaDataPath)) {
+     * 
+     * // load all resources resourceUris.forEach(uri -> modelRepo.getModelResource(uri)); } catch
+     * (Exception e) { // TODO Auto-generated catch block e.printStackTrace(); } }
+     */
 }
